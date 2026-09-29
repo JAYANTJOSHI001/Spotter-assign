@@ -1,0 +1,628 @@
+{
+  "Alvada, OH": {
+    "lat": 41.0503322,
+    "lon": -83.4018693
+  },
+  "Amite, LA": {
+    "lat": 30.7265747,
+    "lon": -90.5089815
+  },
+  "Antioch, TN": {
+    "lat": 36.0600602,
+    "lon": -86.6722192
+  },
+  "Athens, GA": {
+    "lat": 33.9597677,
+    "lon": -83.376398
+  },
+  "Augusta, GA": {
+    "lat": 33.4709714,
+    "lon": -81.9748429
+  },
+  "Baker, FL": {
+    "lat": 30.7972254,
+    "lon": -86.681691
+  },
+  "Batesburg, SC": {
+    "lat": 33.9079201,
+    "lon": -81.5473262
+  },
+  "Belden, MS": {
+    "lat": 34.3103831,
+    "lon": -88.7883888
+  },
+  "Bethany, LA": {
+    "lat": 32.3737683,
+    "lon": -94.0379649
+  },
+  "Blakeslee, PA": {
+    "lat": 41.0925133,
+    "lon": -75.5926681
+  },
+  "Bois D Arc, MO": {
+    "lat": 37.2564382,
+    "lon": -93.507696
+  },
+  "Boise, ID": {
+    "lat": 43.6166163,
+    "lon": -116.200886
+  },
+  "Breezewood, PA": {
+    "lat": 39.9990119,
+    "lon": -78.2404221
+  },
+  "Bridgewater, MA": {
+    "lat": 41.9902206,
+    "lon": -70.9754432
+  },
+  "Brogue, PA": {
+    "lat": 39.8723546,
+    "lon": -76.4846387
+  },
+  "Butte, MT": {
+    "lat": 46.0131505,
+    "lon": -112.536508
+  },
+  "Candler, NC": {
+    "lat": 35.5444359,
+    "lon": -82.6838032
+  },
+  "Canon City, CO": {
+    "lat": 38.4422506,
+    "lon": -105.2348795
+  },
+  "Carson City, NV": {
+    "lat": 39.1663259,
+    "lon": -119.7670374
+  },
+  "Casa Blanca, NM": {
+    "lat": 35.046318,
+    "lon": -107.4713938
+  },
+  "Castle Creek, NY": {
+    "lat": 42.2275753,
+    "lon": -75.918253
+  },
+  "Cedar Grove, TN": {
+    "lat": 36.2517196,
+    "lon": -86.5277724
+  },
+  "Chappell Hill, TX": {
+    "lat": 30.141529,
+    "lon": -96.2567185
+  },
+  "Chesterfield, VA": {
+    "lat": 37.3777927,
+    "lon": -77.5046698
+  },
+  "Clear Brook, VA": {
+    "lat": 39.2564912,
+    "lon": -78.096111
+  },
+  "Clines Corners, NM": {
+    "lat": 35.0094982,
+    "lon": -105.66918
+  },
+  "Colgate, WI": {
+    "lat": 43.1928301,
+    "lon": -88.2067737
+  },
+  "Cross Junction, VA": {
+    "lat": 39.3203785,
+    "lon": -78.2933382
+  },
+  "Curtis Bay, MD": {
+    "lat": 39.2252188,
+    "lon": -76.5900312
+  },
+  "Cusseta, GA": {
+    "lat": 32.3054268,
+    "lon": -84.7727027
+  },
+  "De Witt, IA": {
+    "lat": 41.8242643,
+    "lon": -90.538127
+  },
+  "Denmark, TN": {
+    "lat": 35.5328546,
+    "lon": -89.003952
+  },
+  "Dewey, AZ": {
+    "lat": 34.5297551,
+    "lon": -112.2421149
+  },
+  "Diamond, OH": {
+    "lat": 41.0989463,
+    "lon": -81.022871
+  },
+  "Doswell, VA": {
+    "lat": 37.8601402,
+    "lon": -77.4641492
+  },
+  "Drewryville, VA": {
+    "lat": 36.7157055,
+    "lon": -77.3063603
+  },
+  "Drums, PA": {
+    "lat": 41.018139,
+    "lon": -75.9949252
+  },
+  "Du Bois, PA": null,
+  "Dumont, CO": {
+    "lat": 39.7646887,
+    "lon": -105.600337
+  },
+  "Eastaboga, AL": {
+    "lat": 33.6059367,
+    "lon": -86.0213587
+  },
+  "Edwards, IL": {
+    "lat": 40.7458704,
+    "lon": -89.7442697
+  },
+  "Elizabethport, NJ": {
+    "lat": 40.6501031,
+    "lon": -74.1870888
+  },
+  "Ellabell, GA": {
+    "lat": 32.1235368,
+    "lon": -81.4856673
+  },
+  "Ellenwood, GA": {
+    "lat": 33.6101096,
+    "lon": -84.287978
+  },
+  "Etters, PA": null,
+  "Fackler, AL": {
+    "lat": 34.7925827,
+    "lon": -85.9099775
+  },
+  "Feasterville Trevose, PA": {
+    "lat": 40.1484058,
+    "lon": -74.9934733
+  },
+  "Fortson, GA": {
+    "lat": 33.3778914,
+    "lon": -84.2888119
+  },
+  "Franksville, WI": {
+    "lat": 42.7600188,
+    "lon": -87.9134133
+  },
+  "Gansevoort, NY": {
+    "lat": 43.1962051,
+    "lon": -73.6513967
+  },
+  "Gladstone, VA": {
+    "lat": 37.5468094,
+    "lon": -78.8494619
+  },
+  "Glendale, KY": {
+    "lat": 37.6017278,
+    "lon": -85.9055189
+  },
+  "Glenmont, NY": {
+    "lat": 42.604802,
+    "lon": -73.7695658
+  },
+  "Grassy Butte, ND": {
+    "lat": 47.3925145,
+    "lon": -103.2479655
+  },
+  "Greentown, PA": {
+    "lat": 41.321755,
+    "lon": -75.3054585
+  },
+  "Gum Spring, VA": {
+    "lat": 37.7755262,
+    "lon": -77.8968114
+  },
+  "Hamptonville, NC": {
+    "lat": 36.0984684,
+    "lon": -80.760345
+  },
+  "Hankamer, TX": {
+    "lat": 29.8582755,
+    "lon": -94.6268618
+  },
+  "Harpursville, NY": {
+    "lat": 42.1784124,
+    "lon": -75.6246298
+  },
+  "Hartford, TN": {
+    "lat": 35.8167646,
+    "lon": -83.1432066
+  },
+  "Heiskell, TN": {
+    "lat": 36.081816,
+    "lon": -84.0539821
+  },
+  "Henrico, VA": {
+    "lat": 37.6294756,
+    "lon": -77.5189032
+  },
+  "Hogansburg, NY": {
+    "lat": 44.9739364,
+    "lon": -74.6632416
+  },
+  "Hope Hull, AL": {
+    "lat": 32.2698632,
+    "lon": -86.3571916
+  },
+  "Hot Springs National Park, AR": null,
+  "Hunt Valley, MD": {
+    "lat": 39.4922608,
+    "lon": -76.6589528
+  },
+  "Hurricane Mills, TN": {
+    "lat": 35.9711736,
+    "lon": -87.781969
+  },
+  "Indianapolis, IN": {
+    "lat": 39.7683331,
+    "lon": -86.1583502
+  },
+  "Irving, NY": {
+    "lat": 42.5675589,
+    "lon": -79.1128169
+  },
+  "Irvington, AL": {
+    "lat": 30.5068623,
+    "lon": -88.2338925
+  },
+  "Isom, KY": {
+    "lat": 37.1878764,
+    "lon": -82.8987718
+  },
+  "Ivydale, WV": {
+    "lat": 38.310097,
+    "lon": -81.7045688
+  },
+  "Jean, NV": {
+    "lat": 35.7788568,
+    "lon": -115.3243823
+  },
+  "Joelton, TN": {
+    "lat": 36.3131076,
+    "lon": -86.8652772
+  },
+  "Johns Island, SC": {
+    "lat": 32.69485,
+    "lon": -80.03425
+  },
+  "Kearneysville, WV": {
+    "lat": 39.3881556,
+    "lon": -77.8855516
+  },
+  "Knoxville, AL": {
+    "lat": 33.5917715,
+    "lon": -85.8971885
+  },
+  "Kodak, TN": {
+    "lat": 35.9745323,
+    "lon": -83.6268396
+  },
+  "La Place, LA": {
+    "lat": 32.3784735,
+    "lon": -85.8627339
+  },
+  "La Salle, IL": {
+    "lat": 41.3333679,
+    "lon": -89.0917497
+  },
+  "Lake Ariel, PA": {
+    "lat": 41.4539745,
+    "lon": -75.382681
+  },
+  "Lambsburg, VA": {
+    "lat": 36.5854078,
+    "lon": -80.7611817
+  },
+  "Lanexa, VA": {
+    "lat": 37.4237573,
+    "lon": -76.9010753
+  },
+  "Larsen, WI": {
+    "lat": 44.1916501,
+    "lon": -88.623999
+  },
+  "Lawrence, MS": {
+    "lat": 32.3251443,
+    "lon": -89.2328394
+  },
+  "Leesville, SC": {
+    "lat": 33.916532,
+    "lon": -81.5134368
+  },
+  "Lenorah, TX": {
+    "lat": 32.30456,
+    "lon": -101.8762483
+  },
+  "Lexington, KY": {
+    "lat": 38.0464066,
+    "lon": -84.4970393
+  },
+  "Linwood, NC": {
+    "lat": 35.7506938,
+    "lon": -80.3178306
+  },
+  "Longs, SC": {
+    "lat": 33.9385274,
+    "lon": -78.7330522
+  },
+  "Macon, GA": {
+    "lat": 32.8406946,
+    "lon": -83.6324022
+  },
+  "Maxwell, TX": {
+    "lat": 29.881897,
+    "lon": -97.7956423
+  },
+  "Mc Alpin, FL": null,
+  "Mc Calla, AL": null,
+  "Mc Crory, AR": null,
+  "Mc Graw, NY": null,
+  "Mc Lean, IL": null,
+  "Middlebury Center, PA": {
+    "lat": 41.8436841,
+    "lon": -77.2744202
+  },
+  "Middlesboro, KY": {
+    "lat": 36.6072968,
+    "lon": -83.7143317
+  },
+  "Midland, GA": {
+    "lat": 32.5748608,
+    "lon": -84.827152
+  },
+  "Milldale, CT": {
+    "lat": 41.5661372,
+    "lon": -72.8999672
+  },
+  "Millersville, MD": {
+    "lat": 39.0595542,
+    "lon": -76.6480219
+  },
+  "Milltown, MT": {
+    "lat": 46.8712952,
+    "lon": -113.8817192
+  },
+  "Moapa, NV": {
+    "lat": 36.6673648,
+    "lon": -114.584977
+  },
+  "Monroe Township, NJ": {
+    "lat": 40.335756,
+    "lon": -74.4334464
+  },
+  "Monroeton, PA": {
+    "lat": 41.7125751,
+    "lon": -76.4746649
+  },
+  "Mount Nebo, WV": {
+    "lat": 39.6023047,
+    "lon": -79.7078303
+  },
+  "Nashville, TN": {
+    "lat": 36.1622767,
+    "lon": -86.7742984
+  },
+  "New Boston, MI": {
+    "lat": 42.1625408,
+    "lon": -83.4029885
+  },
+  "New Hampton, NY": {
+    "lat": 41.4098658,
+    "lon": -74.4117435
+  },
+  "Newburg, MD": {
+    "lat": 38.3773478,
+    "lon": -76.9533055
+  },
+  "Newport, MI": {
+    "lat": 42.0022672,
+    "lon": -83.3085419
+  },
+  "Newton Lower Falls, MA": {
+    "lat": 42.3258005,
+    "lon": -71.2563409
+  },
+  "North Billerica, MA": {
+    "lat": 42.5852621,
+    "lon": -71.2877645
+  },
+  "North Jackson, OH": {
+    "lat": 41.1001272,
+    "lon": -80.8571741
+  },
+  "North Oxford, MA": {
+    "lat": 42.1500947,
+    "lon": -71.8684054
+  },
+  "Nottingham, MD": {
+    "lat": 39.3639964,
+    "lon": -76.4521842
+  },
+  "Orla, TX": {
+    "lat": 31.8250149,
+    "lon": -103.9090099
+  },
+  "Ottawa Lake, MI": {
+    "lat": 41.7641517,
+    "lon": -83.7493869
+  },
+  "Pecos, TX": {
+    "lat": 31.4254143,
+    "lon": -103.4952894
+  },
+  "Pendleton, KY": {
+    "lat": 38.4622879,
+    "lon": -85.3035678
+  },
+  "Pioneer, TN": {
+    "lat": 36.4175798,
+    "lon": -84.3140995
+  },
+  "Prairie Hill, TX": {
+    "lat": 30.2488239,
+    "lon": -96.3771874
+  },
+  "Providence Forge, VA": {
+    "lat": 37.4424264,
+    "lon": -77.0439583
+  },
+  "Pryor, OK": {
+    "lat": 36.3084275,
+    "lon": -95.3169136
+  },
+  "Pueblo Of Acoma, NM": null,
+  "Quinton, VA": {
+    "lat": 37.5327893,
+    "lon": -77.1154448
+  },
+  "Rabun Gap, GA": {
+    "lat": 34.9572143,
+    "lon": -83.3864536
+  },
+  "Raphine, VA": {
+    "lat": 37.9373548,
+    "lon": -79.2328102
+  },
+  "Ridgedale, MO": {
+    "lat": 36.5039535,
+    "lon": -93.2237919
+  },
+  "Rising Fawn, GA": {
+    "lat": 34.7600791,
+    "lon": -85.531076
+  },
+  "Roans Prairie, TX": {
+    "lat": 30.5836549,
+    "lon": -95.943324
+  },
+  "Rockville, VA": {
+    "lat": 37.7259779,
+    "lon": -77.6783239
+  },
+  "Rosedale, VA": {
+    "lat": 36.9592782,
+    "lon": -81.9312351
+  },
+  "Round O, SC": {
+    "lat": 32.9371151,
+    "lon": -80.5409352
+  },
+  "Ruther Glen, VA": {
+    "lat": 37.9408753,
+    "lon": -77.4618647
+  },
+  "S Coffeyville, OK": {
+    "lat": 36.9945248,
+    "lon": -95.6202552
+  },
+  "Saint Croix, IN": {
+    "lat": 38.2239531,
+    "lon": -86.5863387
+  },
+  "Saint Johns, FL": null,
+  "Sainte Genevieve, MO": {
+    "lat": 37.9814415,
+    "lon": -90.041779
+  },
+  "Sault Sainte Marie, MI": {
+    "lat": 46.4976734,
+    "lon": -84.3476583
+  },
+  "Sawyer, MI": {
+    "lat": 41.8853207,
+    "lon": -86.5894666
+  },
+  "Skippers, VA": {
+    "lat": 36.6118169,
+    "lon": -77.5466463
+  },
+  "Smiths Creek, MI": {
+    "lat": 42.9139187,
+    "lon": -82.6038085
+  },
+  "Summerfield, FL": {
+    "lat": 29.0085924,
+    "lon": -82.0348092
+  },
+  "Supply, NC": {
+    "lat": 34.0176717,
+    "lon": -78.267499
+  },
+  "Tafton, PA": {
+    "lat": 41.404534,
+    "lon": -75.1829535
+  },
+  "Teays, WV": {
+    "lat": 38.4417571,
+    "lon": -81.9529125
+  },
+  "Tinnie, NM": {
+    "lat": 33.3705561,
+    "lon": -105.2263673
+  },
+  "Tollesboro, KY": {
+    "lat": 38.5595201,
+    "lon": -83.5760258
+  },
+  "Townsend, VA": {
+    "lat": 37.1849815,
+    "lon": -75.958473
+  },
+  "Townville, SC": {
+    "lat": 34.5637137,
+    "lon": -82.8984775
+  },
+  "Troy, VA": {
+    "lat": 37.9509737,
+    "lon": -78.2463934
+  },
+  "Waddy, KY": {
+    "lat": 38.1370153,
+    "lon": -85.0743978
+  },
+  "Wall, TX": {
+    "lat": 31.3743455,
+    "lon": -100.30366
+  },
+  "Waterfall, PA": {
+    "lat": 40.1275826,
+    "lon": -78.0627822
+  },
+  "West Chesterfield, NH": {
+    "lat": 42.9042482,
+    "lon": -72.5156447
+  },
+  "West Coxsackie, NY": {
+    "lat": 42.3606399,
+    "lon": -73.8167921
+  },
+  "West Helena, AR": {
+    "lat": 34.5440124,
+    "lon": -90.6426195
+  },
+  "Westover, MD": {
+    "lat": 38.1240114,
+    "lon": -75.7063171
+  },
+  "Willow Beach, AZ": {
+    "lat": 35.8697801,
+    "lon": -114.6600654
+  },
+  "Winnabow, NC": {
+    "lat": 34.1493374,
+    "lon": -78.0936046
+  },
+  "Woodford, VA": {
+    "lat": 38.1131886,
+    "lon": -77.4088708
+  },
+  "Youngstown, FL": {
+    "lat": 30.3643628,
+    "lon": -85.4382568
+  }
+}

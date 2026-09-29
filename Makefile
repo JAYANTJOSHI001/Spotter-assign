@@ -37,7 +37,9 @@ cov:
 	$(PYTEST) --cov=apps --cov=config --cov-report=term-missing
 
 data:
-	@echo "Data pipeline implemented in P1"
+	$(PYTHON) manage.py prepare_stations --input data/raw/fuel-prices-for-be-assessment.csv --output data/stations_clean.csv
+	$(PYTHON) manage.py geocode_stations --input data/stations_clean.csv --output data/stations_geocoded.csv --report data/geocode_report.md
+	$(PYTHON) manage.py load_stations --input data/stations_geocoded.csv
 
 bench:
 	@echo "Benchmark implemented in P7/P8"

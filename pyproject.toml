@@ -64,3 +64,6 @@ DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py", "*_test.py"]
 testpaths = ["tests"]
 addopts = "-ra -q"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]

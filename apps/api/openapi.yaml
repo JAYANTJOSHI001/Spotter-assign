@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: FuelRoute API
+  version: 1.0.0
+  description: Fast, optimal fuel stop route planner for cross-country USA trips
+paths:
+  /api/v1/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok

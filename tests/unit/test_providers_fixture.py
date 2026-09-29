@@ -55,3 +55,58 @@ def test_fixture_missing_raises_file_not_found() -> None:
         )
 
     assert "Route fixture not found" in str(exc_info.value)
+
+
+def test_fixture_empty_routes(tmp_path) -> None:
+    import json
+
+    from apps.providers.errors import NoRouteError
+    from apps.providers.fixture import coordinate_slug
+
+    start = LatLng(lat=10.0, lng=-10.0)
+    finish = LatLng(lat=11.0, lng=-11.0)
+    slug = coordinate_slug(start, finish)
+
+    bad_file = tmp_path / f"{slug}.json"
+    bad_file.write_text(json.dumps({"code": "Ok", "routes": []}), encoding="utf-8")
+
+    provider = FixtureRouteProvider(fixtures_dir=tmp_path)
+    budget = CallBudget(max_calls=3)
+
+    with pytest.raises(NoRouteError, match="empty routes"):
+        provider.route(start, finish, budget)
+
+
+def test_fixture_gzip_support(tmp_path) -> None:
+    import gzip
+    import json
+
+    from apps.providers.fixture import coordinate_slug
+
+    start = LatLng(lat=20.0, lng=-20.0)
+    finish = LatLng(lat=21.0, lng=-21.0)
+    slug = coordinate_slug(start, finish)
+
+    content = {
+        "code": "Ok",
+        "routes": [
+            {
+                "distance": 160934.4,
+                "duration": 3600.0,
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [[-20.0, 20.0], [-21.0, 21.0]],
+                },
+            }
+        ],
+    }
+
+    gz_file = tmp_path / f"{slug}.json.gz"
+    with gzip.open(gz_file, "wt", encoding="utf-8") as f:
+        json.dump(content, f)
+
+    provider = FixtureRouteProvider(fixtures_dir=tmp_path)
+    budget = CallBudget(max_calls=3)
+
+    res = provider.route(start, finish, budget)
+    assert res.distance_miles == pytest.approx(100.0, 0.1)

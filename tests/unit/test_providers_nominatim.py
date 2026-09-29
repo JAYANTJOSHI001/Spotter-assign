@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import httpx
 import pytest
 import respx
 from django.core.cache import cache
@@ -88,3 +89,43 @@ def test_nominatim_403_user_agent() -> None:
         geocoder.geocode("Anywhere", budget)
 
     assert "HTTP 403" in str(exc_info.value)
+
+
+@respx.mock
+def test_nominatim_timeout() -> None:
+    geocoder = NominatimGeocoder(base_url="https://test.nominatim.org", user_agent="test/1.0")
+    budget = CallBudget(max_calls=3)
+
+    respx.get("https://test.nominatim.org/search").mock(
+        side_effect=httpx.TimeoutException("Connection timed out")
+    )
+
+    from apps.providers.errors import UpstreamTimeout
+
+    with pytest.raises(UpstreamTimeout):
+        geocoder.geocode("AnywhereTimeout", budget)
+
+
+@respx.mock
+def test_nominatim_server_error_500() -> None:
+    geocoder = NominatimGeocoder(base_url="https://test.nominatim.org", user_agent="test/1.0")
+    budget = CallBudget(max_calls=3)
+
+    respx.get("https://test.nominatim.org/search").respond(status_code=500, text="Internal Error")
+
+    with pytest.raises(UpstreamError, match="server error HTTP 500"):
+        geocoder.geocode("Anywhere500", budget)
+
+
+@respx.mock
+def test_nominatim_invalid_lat_lon() -> None:
+    geocoder = NominatimGeocoder(base_url="https://test.nominatim.org", user_agent="test/1.0")
+    budget = CallBudget(max_calls=3)
+
+    respx.get("https://test.nominatim.org/search").respond(
+        status_code=200,
+        json=[{"lat": "not-a-float", "lon": "123.4"}],
+    )
+
+    with pytest.raises(UpstreamError, match="missing or invalid lat/lon"):
+        geocoder.geocode("AnywhereBadCoords", budget)

@@ -42,7 +42,7 @@ data:
 	$(PYTHON) manage.py load_stations --input data/stations_geocoded.csv
 
 bench:
-	@echo "Benchmark implemented in P7/P8"
+	$(PYTHON) scripts/bench.py --output docs/PERFORMANCE.md
 
 docker-build:
 	docker build -t fuelroute:latest .

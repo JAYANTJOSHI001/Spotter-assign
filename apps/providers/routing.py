@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import threading
 import time
 from typing import Any
 
@@ -67,56 +68,80 @@ def get_fallback_provider() -> RouteProvider | None:
     return None
 
 
+_ROUTE_LOCKS: dict[str, threading.Lock] = {}
+_LOCKS_MUTEX = threading.Lock()
+
+
+def _get_route_lock(key: str) -> threading.Lock:
+    """Retrieve or create a reentrant lock per cache key."""
+    with _LOCKS_MUTEX:
+        if key not in _ROUTE_LOCKS:
+            _ROUTE_LOCKS[key] = threading.Lock()
+        return _ROUTE_LOCKS[key]
+
+
 def get_route(
     start: LatLng,
     finish: LatLng,
     budget: CallBudget,
     retry_delay_s: float = 0.2,
 ) -> RouteResult:
-    """Retrieve driving route with caching, 1 retry on timeout/5xx, and fallback."""
+    """Retrieve driving route with caching, 1 retry on timeout/5xx, fallback, and stampede protection."""
     cache_key = make_route_cache_key(start, finish)
     ttl = int(getattr(settings, "CACHE_TTL_S", 86400))
 
-    # 1. Cache lookup
+    # 1. Fast cache lookup
     cached = cache.get(cache_key)
     if cached is not None:
         return deserialize_route(cached, provider_override="cache")
 
-    primary = get_primary_provider()
-    fallback = get_fallback_provider()
+    # 2. Acquire per-key lock for stampede protection
+    lock = _get_route_lock(cache_key)
+    with lock:
+        # Double-check cache read inside lock
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return deserialize_route(cached, provider_override="cache")
 
-    last_error: ProviderError | None = None
+        primary = get_primary_provider()
+        fallback = get_fallback_provider()
 
-    # 2. Try primary provider
-    try:
-        result = primary.route(start, finish, budget)
-        cache.set(cache_key, serialize_route(result), timeout=ttl)
-        return result
-    except (UpstreamTimeout, UpstreamError) as exc:
-        last_error = exc
-        # Retry once only on timeout or 5xx if budget remains
-        can_retry = budget.max_calls - len(budget.records) > 0
-        if can_retry and "quota" not in str(exc).lower() and "forbidden" not in str(exc).lower():
-            if retry_delay_s > 0:
-                time.sleep(retry_delay_s)
-            try:
-                result = primary.route(start, finish, budget)
-                cache.set(cache_key, serialize_route(result), timeout=ttl)
-                return result
-            except (UpstreamTimeout, UpstreamError) as retry_exc:
-                last_error = retry_exc
+        last_error: ProviderError | None = None
 
-    # 3. Fallback provider if configured and budget remains
-    if fallback is not None and (budget.max_calls - len(budget.records) > 0):
+        # 3. Try primary provider
         try:
-            result = fallback.route(start, finish, budget)
+            result = primary.route(start, finish, budget)
             cache.set(cache_key, serialize_route(result), timeout=ttl)
             return result
-        except ProviderError as fb_exc:
-            last_error = fb_exc
+        except (UpstreamTimeout, UpstreamError) as exc:
+            last_error = exc
+            # Retry once only on timeout or 5xx if budget remains
+            can_retry = budget.max_calls - len(budget.records) > 0
+            if (
+                can_retry
+                and "quota" not in str(exc).lower()
+                and "forbidden" not in str(exc).lower()
+            ):
+                if retry_delay_s > 0:
+                    time.sleep(retry_delay_s)
+                try:
+                    result = primary.route(start, finish, budget)
+                    cache.set(cache_key, serialize_route(result), timeout=ttl)
+                    return result
+                except (UpstreamTimeout, UpstreamError) as retry_exc:
+                    last_error = retry_exc
 
-    # 4. If we reached here, raise the last encountered error
-    if last_error is not None:
-        raise last_error
+        # 4. Fallback provider if configured and budget remains
+        if fallback is not None and (budget.max_calls - len(budget.records) > 0):
+            try:
+                result = fallback.route(start, finish, budget)
+                cache.set(cache_key, serialize_route(result), timeout=ttl)
+                return result
+            except ProviderError as fb_exc:
+                last_error = fb_exc
 
-    raise UpstreamError("Failed to calculate route with available providers")
+        # 5. If we reached here, raise the last encountered error
+        if last_error is not None:
+            raise last_error
+
+        raise UpstreamError("Failed to calculate route with available providers")

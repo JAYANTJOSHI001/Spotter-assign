@@ -154,7 +154,9 @@ else:
 _raw_allowed = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").strip()
 ALLOWED_HOSTS = [h.strip() for h in _raw_allowed.split(",") if h.strip()]
 if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+elif "testserver" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("testserver")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -183,6 +185,20 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# -----------------------------------------------------------------------------
+# Security Settings (configurable via env)
+# -----------------------------------------------------------------------------
+SECURE_SSL_REDIRECT = get_bool("SECURE_SSL_REDIRECT", default=False)
+SESSION_COOKIE_SECURE = get_bool("SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = get_bool("CSRF_COOKIE_SECURE", default=not DEBUG)
+SECURE_HSTS_SECONDS = get_int(
+    "SECURE_HSTS_SECONDS",
+    default=31536000 if (not DEBUG and SECURE_SSL_REDIRECT) else 0,
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+SECURE_HSTS_PRELOAD = get_bool("SECURE_HSTS_PRELOAD", default=False)
+
 
 TEMPLATES = [
     {
@@ -277,6 +293,7 @@ EXTERNAL_CALL_BUDGET = get_int("EXTERNAL_CALL_BUDGET", default=3, min_val=1)
 UPSTREAM_TIMEOUT_S = get_float("UPSTREAM_TIMEOUT_S", default=8.0, must_be_strictly_positive=True)
 CACHE_TTL_S = get_int("CACHE_TTL_S", default=86400, min_val=0)
 RATE_LIMIT_PER_MIN = get_int("RATE_LIMIT_PER_MIN", default=60, min_val=0)
+DISABLE_RATE_LIMIT = get_bool("DISABLE_RATE_LIMIT", default=False)
 
 # -----------------------------------------------------------------------------
 # Static Files

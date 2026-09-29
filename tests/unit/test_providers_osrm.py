@@ -136,3 +136,118 @@ def test_osrm_malformed_json() -> None:
         )
 
     assert "valid JSON" in str(exc_info.value)
+
+
+@respx.mock
+def test_osrm_other_error_code() -> None:
+    provider = OSRMProvider(base_url="https://test.osrm.org")
+    budget = CallBudget(max_calls=3)
+
+    respx.get(url__startswith="https://test.osrm.org/route/v1/driving/").respond(
+        status_code=200, json={"code": "InvalidQuery", "message": "Query parameter invalid"}
+    )
+
+    with pytest.raises(UpstreamError) as exc_info:
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+    assert "InvalidQuery" in str(exc_info.value)
+
+
+@respx.mock
+def test_osrm_empty_routes_list() -> None:
+    provider = OSRMProvider(base_url="https://test.osrm.org")
+    budget = CallBudget(max_calls=3)
+
+    respx.get(url__startswith="https://test.osrm.org/route/v1/driving/").respond(
+        status_code=200, json={"code": "Ok", "routes": []}
+    )
+
+    with pytest.raises(NoRouteError) as exc_info:
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+    assert "no routes" in str(exc_info.value)
+
+
+@respx.mock
+def test_osrm_invalid_coordinates_shape() -> None:
+    provider = OSRMProvider(base_url="https://test.osrm.org")
+    budget = CallBudget(max_calls=3)
+
+    respx.get(url__startswith="https://test.osrm.org/route/v1/driving/").respond(
+        status_code=200,
+        json={
+            "code": "Ok",
+            "routes": [
+                {
+                    "distance": 1000.0,
+                    "duration": 100.0,
+                    "geometry": {"type": "LineString", "coordinates": [[1.0]]},  # Not length 2
+                }
+            ],
+        },
+    )
+
+    with pytest.raises(UpstreamError):
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+
+@respx.mock
+def test_osrm_missing_distance_or_duration() -> None:
+    provider = OSRMProvider(base_url="https://test.osrm.org")
+    budget = CallBudget(max_calls=3)
+
+    respx.get(url__startswith="https://test.osrm.org/route/v1/driving/").respond(
+        status_code=200,
+        json={
+            "code": "Ok",
+            "routes": [{"geometry": {"coordinates": [[-87.0, 41.0], [-88.0, 42.0]]}}],
+        },
+    )
+
+    with pytest.raises(UpstreamError, match="missing distance or duration"):
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+
+@respx.mock
+def test_osrm_coords_out_of_bounds() -> None:
+    provider = OSRMProvider(base_url="https://test.osrm.org")
+    budget = CallBudget(max_calls=3)
+
+    respx.get(url__startswith="https://test.osrm.org/route/v1/driving/").respond(
+        status_code=200,
+        json={
+            "code": "Ok",
+            "routes": [
+                {
+                    "distance": 1000.0,
+                    "duration": 100.0,
+                    "geometry": {
+                        "coordinates": [[-87.0, 95.0], [-88.0, 42.0]]  # lat 95 > 90
+                    },
+                }
+            ],
+        },
+    )
+
+    with pytest.raises(UpstreamError, match="latitudes out of range"):
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )

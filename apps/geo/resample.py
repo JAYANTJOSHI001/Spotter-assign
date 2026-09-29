@@ -142,28 +142,6 @@ def resample(
     )
 
 
-def _perpendicular_distance_sq(
-    pt: np.ndarray,
-    line_start: np.ndarray,
-    line_end: np.ndarray,
-) -> float:
-    """Compute squared perpendicular distance from point to line segment in equirectangular projection."""
-    dx = line_end[0] - line_start[0]
-    dy = line_end[1] - line_start[1]
-    denom = dx * dx + dy * dy
-    if denom == 0:
-        return float((pt[0] - line_start[0]) ** 2 + (pt[1] - line_start[1]) ** 2)
-
-    # Cross product magnitude
-    num = (
-        (line_end[1] - line_start[1]) * pt[0]
-        - (line_end[0] - line_start[0]) * pt[1]
-        + line_end[0] * line_start[1]
-        - line_end[1] * line_start[0]
-    )
-    return float((num * num) / denom)
-
-
 def _douglas_peucker_indices(coords: np.ndarray, epsilon_sq: float) -> np.ndarray:
     """Iterative (non-recursive) Douglas-Peucker returning boolean mask of kept points."""
     n = len(coords)

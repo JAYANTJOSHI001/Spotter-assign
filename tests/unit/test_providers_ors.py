@@ -87,3 +87,92 @@ def test_ors_auth_or_quota_error_403() -> None:
 
     assert "quota error" in str(exc_info.value)
     assert exc_info.value.http_status == 502
+
+
+@respx.mock
+def test_ors_server_error_500() -> None:
+    provider = ORSProvider(api_key="test-key", base_url="https://api.openrouteservice.org/test")
+    budget = CallBudget(max_calls=3)
+
+    respx.post("https://api.openrouteservice.org/test").respond(
+        status_code=500, text="Internal Server Error"
+    )
+
+    with pytest.raises(UpstreamError) as exc_info:
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+    assert "server error HTTP 500" in str(exc_info.value)
+
+
+@respx.mock
+def test_ors_empty_features() -> None:
+    provider = ORSProvider(api_key="test-key", base_url="https://api.openrouteservice.org/test")
+    budget = CallBudget(max_calls=3)
+
+    respx.post("https://api.openrouteservice.org/test").respond(
+        status_code=200, json={"type": "FeatureCollection", "features": []}
+    )
+
+    from apps.providers.errors import NoRouteError
+
+    with pytest.raises(NoRouteError) as exc_info:
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+    assert "empty features list" in str(exc_info.value)
+
+
+@respx.mock
+def test_ors_missing_summary() -> None:
+    provider = ORSProvider(api_key="test-key", base_url="https://api.openrouteservice.org/test")
+    budget = CallBudget(max_calls=3)
+
+    respx.post("https://api.openrouteservice.org/test").respond(
+        status_code=200,
+        json={
+            "type": "FeatureCollection",
+            "features": [
+                {"properties": {}, "geometry": {"coordinates": [[-87.0, 41.0], [-88.0, 42.0]]}}
+            ],
+        },
+    )
+
+    with pytest.raises(UpstreamError, match="missing distance or duration"):
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )
+
+
+@respx.mock
+def test_ors_invalid_geometry_coords() -> None:
+    provider = ORSProvider(api_key="test-key", base_url="https://api.openrouteservice.org/test")
+    budget = CallBudget(max_calls=3)
+
+    respx.post("https://api.openrouteservice.org/test").respond(
+        status_code=200,
+        json={
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "properties": {"summary": {"distance": 1000.0, "duration": 100.0}},
+                    "geometry": {"coordinates": [[-87.0, 95.0], [-88.0, 42.0]]},  # lat 95 > 90
+                }
+            ],
+        },
+    )
+
+    with pytest.raises(UpstreamError, match="latitudes out of range"):
+        provider.route(
+            start=LatLng(lat=41.8781, lng=-87.6298),
+            finish=LatLng(lat=42.0, lng=-88.0),
+            budget=budget,
+        )

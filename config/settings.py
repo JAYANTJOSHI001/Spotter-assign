@@ -172,6 +172,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.api.middleware.RequestIdMiddleware",
+    "apps.api.middleware.ServerTimingMiddleware",
+    "apps.api.middleware.CallBudgetMiddleware",
+    "apps.api.middleware.RateLimitMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.gzip.GZipMiddleware",

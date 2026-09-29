@@ -180,16 +180,21 @@ def _douglas_peucker_indices(coords: np.ndarray, epsilon_sq: float) -> np.ndarra
 
         p_start = coords[start_idx]
         p_end = coords[end_idx]
+        d = p_end - p_start
+        denom = float(d[0] * d[0] + d[1] * d[1])
 
-        max_d_sq = -1.0
-        max_idx = start_idx
+        pts = coords[start_idx + 1 : end_idx]
+        if denom < 1e-14:
+            d_sq = np.sum((pts - p_start) ** 2, axis=1)
+        else:
+            num = (
+                pts[:, 0] * d[1] - pts[:, 1] * d[0] + p_end[0] * p_start[1] - p_end[1] * p_start[0]
+            )
+            d_sq = (num * num) / denom
 
-        # Evaluate candidate points in [start_idx + 1, end_idx - 1]
-        for i in range(start_idx + 1, end_idx):
-            d_sq = _perpendicular_distance_sq(coords[i], p_start, p_end)
-            if d_sq > max_d_sq:
-                max_d_sq = d_sq
-                max_idx = i
+        max_offset = int(np.argmax(d_sq))
+        max_d_sq = float(d_sq[max_offset])
+        max_idx = start_idx + 1 + max_offset
 
         if max_d_sq > epsilon_sq:
             keep[max_idx] = True
@@ -220,15 +225,22 @@ def simplify_for_response(
     if n <= max_points:
         return coords
 
-    # Binary search for epsilon that achieves len(result) <= max_points
-    # with minimum distortion
-    low_eps_sq = 1e-12
-    high_eps_sq = 1.0
-    best_mask = np.ones(n, dtype=bool)
+    # If coordinate count is massive (> 3000), pre-subsample uniformly to 3000 points
+    # to keep Douglas-Peucker blazing fast while preserving all macro curves and endpoints
+    if n > 3000:
+        pre_idx = np.linspace(0, n - 1, 3000, dtype=int)
+        coords_eval = coords_arr[pre_idx]
+    else:
+        coords_eval = coords_arr
 
-    for _ in range(25):
+    # Binary search for epsilon that achieves len(result) <= max_points
+    low_eps_sq = 1e-12
+    high_eps_sq = 1e-2
+    best_mask = np.ones(len(coords_eval), dtype=bool)
+
+    for _ in range(12):
         mid_eps_sq = (low_eps_sq + high_eps_sq) / 2.0
-        mask = _douglas_peucker_indices(coords_arr, mid_eps_sq)
+        mask = _douglas_peucker_indices(coords_eval, mid_eps_sq)
         count = int(np.sum(mask))
 
         if count <= max_points:
@@ -237,7 +249,7 @@ def simplify_for_response(
         else:
             low_eps_sq = mid_eps_sq
 
-    simplified = coords_arr[best_mask]
+    simplified = coords_eval[best_mask]
 
     # If still > max_points (edge case), take uniform subsample retaining endpoints
     if len(simplified) > max_points:

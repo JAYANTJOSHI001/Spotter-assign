@@ -1,20 +1,540 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: FuelRoute API
   version: 1.0.0
-  description: Fast, optimal fuel stop route planner for cross-country USA trips
+  description: >
+    Production-ready fuel route optimization service for the USA. Calculates the cheapest
+    fuel stops along a road trip (500-mile vehicle range, 10 MPG), minimizes total fuel cost,
+    and minimizes external routing calls (1 typical call, at most 3).
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
 paths:
   /api/v1/health:
     get:
-      summary: Health check
+      summary: Service health check
+      description: Returns database status, loaded fuel station count, and data version hash.
+      operationId: checkHealth
       responses:
         '200':
           description: Service healthy
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service degraded or station index empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/route:
+    get:
+      summary: Plan optimal fuel route (Query Parameters)
+      description: Calculates route, cheapest fuel stops, and total cost given start and finish.
+      operationId: planRouteGet
+      parameters:
+        - name: start
+          in: query
+          required: true
+          description: Start location (City, ST or lat,lng or address)
+          schema:
+            type: string
+            example: Chicago, IL
+        - name: finish
+          in: query
+          required: true
+          description: Finish location (City, ST or lat,lng or address)
+          schema:
+            type: string
+            example: Dallas, TX
+        - name: max_range_miles
+          in: query
+          required: false
+          description: Vehicle full tank range in miles (50-1000)
+          schema:
+            type: integer
+            default: 500
+            minimum: 50
+            maximum: 1000
+        - name: mpg
+          in: query
+          required: false
+          description: Fuel efficiency in miles per gallon (1-100)
+          schema:
+            type: number
+            default: 10.0
+            minimum: 1.0
+            maximum: 100.0
+        - name: geometry
+          in: query
+          required: false
+          description: Geometry simplification mode
+          schema:
+            type: string
+            enum: [full, simplified, none]
+            default: simplified
+        - name: corridor_miles
+          in: query
+          required: false
+          description: Station search corridor buffer sequence in miles
+          schema:
+            type: string
+            default: "10,25,50"
+      responses:
+        '200':
+          description: Optimal fuel route plan
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+            X-External-Calls:
+              schema:
+                type: string
+            Server-Timing:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorEnvelope'
+        '422':
+          description: Domain or routing error (Location not found, Outside USA, Same location, No route, No feasible plan)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitedEnvelope'
+        '502':
+          description: Upstream provider error or budget exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamErrorEnvelope'
+        '504':
+          description: Upstream provider timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamTimeoutEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorEnvelope'
+
+    post:
+      summary: Plan optimal fuel route (JSON Body)
+      description: Calculates route, cheapest fuel stops, and total cost given start and finish.
+      operationId: planRoutePost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequestBody'
+      responses:
+        '200':
+          description: Optimal fuel route plan
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+            X-External-Calls:
+              schema:
+                type: string
+            Server-Timing:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorEnvelope'
+        '422':
+          description: Domain or routing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitedEnvelope'
+        '502':
+          description: Upstream provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamErrorEnvelope'
+        '504':
+          description: Upstream provider timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpstreamTimeoutEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorEnvelope'
+
+  /api/v1/route/map:
+    get:
+      summary: Render interactive Leaflet map
+      description: Returns an HTML page displaying the route polyline, start/finish, and fuel stop markers.
+      operationId: renderRouteMap
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: finish
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rendered HTML page with Leaflet map
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorEnvelope'
+        '422':
+          description: Domain error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, db, stations]
+      properties:
+        status:
+          type: string
+          example: ok
+        db:
+          type: string
+          example: ok
+        stations:
+          type: integer
+          example: 6611
+        data_version:
+          type: string
+          example: d9f8e4b1...
+        error:
+          type: string
+
+    RouteRequestBody:
+      type: object
+      required: [start, finish]
+      properties:
+        start:
+          oneOf:
+            - type: string
+              example: Chicago, IL
+            - type: object
+              required: [lat, lng]
+              properties:
+                lat:
+                  type: number
+                lng:
+                  type: number
+        finish:
+          oneOf:
+            - type: string
+              example: Dallas, TX
+            - type: object
+              required: [lat, lng]
+              properties:
+                lat:
+                  type: number
+                lng:
+                  type: number
+        max_range_miles:
+          type: integer
+          default: 500
+          minimum: 50
+          maximum: 1000
+        mpg:
+          type: number
+          default: 10.0
+          minimum: 1.0
+          maximum: 100.0
+        geometry:
+          type: string
+          enum: [full, simplified, none]
+          default: simplified
+        corridor_miles:
+          type: string
+          default: "10,25,50"
+
+    ResolvedLocation:
+      type: object
+      required: [query, lat, lng, label, source]
+      properties:
+        query:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        label:
+          type: string
+        source:
+          type: string
+          enum: [gazetteer, coordinates, nominatim]
+
+    RouteResponse:
+      type: object
+      required: [request, route, fuel_plan, map, meta]
+      properties:
+        request:
+          type: object
+          required: [start, finish]
+          properties:
+            start:
+              $ref: '#/components/schemas/ResolvedLocation'
+            finish:
+              $ref: '#/components/schemas/ResolvedLocation'
+        route:
+          type: object
+          required: [distance_miles, duration_minutes, provider, bbox, geometry]
+          properties:
+            distance_miles:
+              type: number
+            duration_minutes:
+              type: number
+            provider:
+              type: string
+            bbox:
+              type: array
+              items:
+                type: number
+            geometry:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: LineString
+                coordinates:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      type: number
+        fuel_plan:
+          type: object
+          required: [assumptions, start_fill, stops, totals]
+          properties:
+            assumptions:
+              type: object
+            start_fill:
+              type: object
+            stops:
+              type: array
+              items:
+                $ref: '#/components/schemas/FuelStop'
+            totals:
+              type: object
+        map:
+          type: object
+          required: [html_url, geojson]
+          properties:
+            html_url:
+              type: string
+            geojson:
+              type: object
+        meta:
+          type: object
+          required: [request_id, external_calls, external_calls_detail, cache, timings_ms, data_version, warnings]
+          properties:
+            request_id:
+              type: string
+            external_calls:
+              type: integer
+            external_calls_detail:
+              type: array
+              items:
                 type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
+            cache:
+              type: string
+              enum: [hit, miss]
+            timings_ms:
+              type: object
+            data_version:
+              type: string
+            warnings:
+              type: array
+              items:
+                type: string
+
+    FuelStop:
+      type: object
+      required:
+        - sequence
+        - opis_id
+        - name
+        - address
+        - city
+        - state
+        - lat
+        - lng
+        - price_per_gallon
+        - mile_marker
+        - offset_miles
+        - detour_miles
+        - gallons_purchased
+        - cost_usd
+        - fuel_on_arrival_gallons
+        - fuel_after_gallons
+      properties:
+        sequence:
+          type: integer
+        opis_id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        price_per_gallon:
+          type: number
+        mile_marker:
+          type: number
+        offset_miles:
+          type: number
+        detour_miles:
+          type: number
+        gallons_purchased:
+          type: number
+        cost_usd:
+          type: number
+        fuel_on_arrival_gallons:
+          type: number
+        fuel_after_gallons:
+          type: number
+
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - LOCATION_NOT_FOUND
+        - OUTSIDE_USA
+        - SAME_LOCATION
+        - NO_ROUTE
+        - NO_FEASIBLE_PLAN
+        - RATE_LIMITED
+        - UPSTREAM_ERROR
+        - UPSTREAM_TIMEOUT
+        - INTERNAL_ERROR
+
+    ErrorDetail:
+      type: object
+      required: [code, message, details, request_id]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+        details:
+          type: object
+        request_id:
+          type: string
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+    ValidationErrorEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ErrorEnvelope'
+      example:
+        error:
+          code: VALIDATION_ERROR
+          message: Missing required parameter 'start'
+          details: { field: start }
+          request_id: 3c9d7482-1234-4567-89ab-cdef01234567
+
+    RateLimitedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ErrorEnvelope'
+      example:
+        error:
+          code: RATE_LIMITED
+          message: Rate limit of 60 requests per minute exceeded.
+          details: {}
+          request_id: 3c9d7482-1234-4567-89ab-cdef01234567
+
+    UpstreamErrorEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ErrorEnvelope'
+      example:
+        error:
+          code: UPSTREAM_ERROR
+          message: Upstream routing provider failed
+          details: {}
+          request_id: 3c9d7482-1234-4567-89ab-cdef01234567
+
+    UpstreamTimeoutEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ErrorEnvelope'
+      example:
+        error:
+          code: UPSTREAM_TIMEOUT
+          message: Upstream provider timed out
+          details: {}
+          request_id: 3c9d7482-1234-4567-89ab-cdef01234567
+
+    InternalErrorEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ErrorEnvelope'
+      example:
+        error:
+          code: INTERNAL_ERROR
+          message: An internal error occurred processing the route.
+          details: {}
+          request_id: 3c9d7482-1234-4567-89ab-cdef01234567

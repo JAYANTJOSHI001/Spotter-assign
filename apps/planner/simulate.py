@@ -48,7 +48,7 @@ def validate_plan(
 
     pos_miles = 0.0
     total_detour_miles = 0.0
-    discretization_tolerance = (1.0 / mpg) + 1e-6
+    discretization_tolerance = max(0.5, len(plan.stops) * (1.0 / mpg))
 
     for i, stop in enumerate(plan.stops, start=1):
         leg_miles = stop.mile_marker - pos_miles

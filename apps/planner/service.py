@@ -210,7 +210,7 @@ def plan_trip(
             "state": meta.get("state", ""),
             "lat": round(float(index.lat[s.station_idx]), 5),
             "lng": round(float(index.lng[s.station_idx]), 5),
-            "price_per_gallon": round(s.price, 3),
+            "price_per_gallon": round(s.price, 4),
             "mile_marker": round(s.mile_marker, 1),
             "offset_miles": round(s.offset_miles, 1),
             "detour_miles": round(s.detour_miles, 1),
@@ -255,7 +255,7 @@ def plan_trip(
     if plan_result.start_fill is not None:
         start_fill_data = {
             "gallons": round(float(plan_result.start_fill.gallons), 2),
-            "price_per_gallon": round(plan_result.start_fill.price, 3),
+            "price_per_gallon": round(plan_result.start_fill.price, 4),
             "cost_usd": round(float(plan_result.start_fill.cost_usd), 2),
         }
 

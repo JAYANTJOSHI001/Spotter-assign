@@ -235,6 +235,55 @@ def _try_parse_coordinates(value: Any) -> tuple[float, float, str | None] | None
     return lat, lng, warning
 
 
+CANADIAN_PROVINCES: set[str] = {
+    "AB",
+    "BC",
+    "MB",
+    "NB",
+    "NL",
+    "NS",
+    "NT",
+    "NU",
+    "ON",
+    "PE",
+    "QC",
+    "SK",
+    "YT",
+    "ALBERTA",
+    "BRITISH COLUMBIA",
+    "MANITOBA",
+    "NEW BRUNSWICK",
+    "NEWFOUNDLAND",
+    "NOVA SCOTIA",
+    "NORTHWEST TERRITORIES",
+    "NUNAVUT",
+    "ONTARIO",
+    "PRINCE EDWARD ISLAND",
+    "QUEBEC",
+    "SASKATCHEWAN",
+    "YUKON",
+}
+
+NON_US_CITIES: set[str] = {
+    "TORONTO",
+    "VANCOUVER",
+    "MONTREAL",
+    "OTTAWA",
+    "CALGARY",
+    "EDMONTON",
+    "QUEBEC CITY",
+    "WINNIPEG",
+    "HALIFAX",
+    "VICTORIA",
+    "TIJUANA",
+    "MEXICO CITY",
+    "JUAREZ",
+    "MONTERREY",
+    "GUADALAJARA",
+    "CANCUN",
+}
+
+
 def _try_parse_city_state(text: str) -> tuple[str, str] | None:
     """Extract (city, state_abbr) from 'City, ST', 'City ST', or 'City, State Name'."""
     val = text.strip()
@@ -248,6 +297,9 @@ def _try_parse_city_state(text: str) -> tuple[str, str] | None:
 
     city_raw = match.group(1).strip()
     state_raw = match.group(2).strip().upper()
+
+    if state_raw in CANADIAN_PROVINCES:
+        raise OutsideUSA(f"Location '{text}' is in Canada and outside supported contiguous US")
 
     if state_raw in US_STATES:
         return city_raw, US_STATES[state_raw]
@@ -294,6 +346,11 @@ def resolve_location(value: Any, budget: CallBudget) -> ResolvedLocation:
         raise LocationNotFound(f"Invalid location input: {value}")
 
     text_input = value.strip()
+    upper_input = text_input.upper()
+
+    # Reject explicit non-US locations before spending external calls
+    if re.search(r"\b(CANADA|MEXICO)\b", upper_input) or upper_input in NON_US_CITIES:
+        raise OutsideUSA(f"Location '{text_input}' is outside supported contiguous US")
 
     # 2. Offline Gazetteer input ("City, ST" or "City, State Name")
     parsed_cs = _try_parse_city_state(text_input)

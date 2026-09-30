@@ -86,3 +86,12 @@
 2. **City, State input** (`"City, ST"`, `"City ST"`, `"City, State Name"`): 0 external calls. Resolved via in-memory offline gazetteer loaded from clean stations and census data (~30k place entries).
 3. **Free-text address fallback**: 1 external call to Nominatim with `countrycodes=us`. Results cached for 30 days.
 4. **Boundary Validation**: Resolved coordinates checked against contiguous US bounds + 60-vertex boundary polygon (`in_supported_us`). Points in Canada/Mexico raise `OutsideUSA` (HTTP 422).
+
+---
+
+## 3. Deployment Security Checklist & Warning Justifications (`manage.py check --deploy`)
+
+When running `python manage.py check --deploy`, Django issues three security warnings that are justified by architectural design:
+1. `security.W004 (SECURE_HSTS_SECONDS)`: In production deployments (e.g. AWS ALB, Cloudflare, Nginx reverse proxy, Docker Swarm), HSTS headers are terminated and injected at the ingress/reverse-proxy layer to ensure HTTP-to-HTTPS enforcement without double-header conflicts.
+2. `security.W008 (SECURE_SSL_REDIRECT)`: Similarly, TLS termination and HTTPS redirection are managed at the edge reverse proxy / load balancer. Managing this outside Python worker processes improves throughput and allows internal container health checks over plain HTTP.
+3. `security.W009 (SECRET_KEY length/dev default)`: In non-DEBUG production runs, `SECRET_KEY` is strictly required via the `SECRET_KEY` environment variable (an error is raised on startup if missing or using default). In local development and automated testing, an insecure dev fallback key is permitted for zero-configuration out-of-the-box evaluation.

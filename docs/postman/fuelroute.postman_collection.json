@@ -1,0 +1,683 @@
+{
+  "info": {
+    "_postman_id": "7f8b9a10-c4e2-482a-bc91-31a8940cfd12",
+    "name": "FuelRoute API",
+    "description": "Comprehensive test and demo collection for FuelRoute API: optimal, cost-minimized fuel stop planning across contiguous USA.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Happy path",
+      "item": [
+        {
+          "name": "Short Trip (Chicago, IL → St. Louis, MO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"St. Louis, MO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test(\"Total fuel cost is a valid number\", function () {",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.a('number');",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"External call budget is respected (<= 3)\", function () {",
+                  "    pm.expect(data.meta.external_calls).to.be.at.most(3);",
+                  "});",
+                  "",
+                  "pm.test(\"Stops ordered by mile marker\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    for (var i = 1; i < stops.length; i++) {",
+                  "        pm.expect(stops[i].mile_marker).to.be.at.least(stops[i-1].mile_marker);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"No gap > 500 miles between consecutive stops\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    var maxRange = data.route.parameters ? data.route.parameters.max_range_miles : 500;",
+                  "    var pos = 0.0;",
+                  "    for (var i = 0; i < stops.length; i++) {",
+                  "        var leg = stops[i].mile_marker - pos;",
+                  "        pm.expect(leg).to.be.at.most(maxRange + 1.0);",
+                  "        pos = stops[i].mile_marker;",
+                  "    }",
+                  "    var finalLeg = data.route.distance_miles - pos;",
+                  "    pm.expect(finalLeg).to.be.at.most(maxRange + 1.0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medium Trip (Chicago, IL → Dallas, TX)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Dallas, TX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test(\"Total fuel cost is a valid number\", function () {",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.a('number');",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"External call budget is respected (<= 3)\", function () {",
+                  "    pm.expect(data.meta.external_calls).to.be.at.most(3);",
+                  "});",
+                  "",
+                  "pm.test(\"Stops ordered by mile marker\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    for (var i = 1; i < stops.length; i++) {",
+                  "        pm.expect(stops[i].mile_marker).to.be.at.least(stops[i-1].mile_marker);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"No gap > 500 miles between consecutive stops\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    var maxRange = data.route.parameters ? data.route.parameters.max_range_miles : 500;",
+                  "    var pos = 0.0;",
+                  "    for (var i = 0; i < stops.length; i++) {",
+                  "        var leg = stops[i].mile_marker - pos;",
+                  "        pm.expect(leg).to.be.at.most(maxRange + 1.0);",
+                  "        pos = stops[i].mile_marker;",
+                  "    }",
+                  "    var finalLeg = data.route.distance_miles - pos;",
+                  "    pm.expect(finalLeg).to.be.at.most(maxRange + 1.0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cross-Country (New York, NY → Los Angeles, CA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"New York, NY\",\n  \"finish\": \"Los Angeles, CA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test(\"Total fuel cost is a valid number\", function () {",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.a('number');",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"External call budget is respected (<= 3)\", function () {",
+                  "    pm.expect(data.meta.external_calls).to.be.at.most(3);",
+                  "});",
+                  "",
+                  "pm.test(\"Stops ordered by mile marker\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    for (var i = 1; i < stops.length; i++) {",
+                  "        pm.expect(stops[i].mile_marker).to.be.at.least(stops[i-1].mile_marker);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"No gap > 500 miles between consecutive stops\", function () {",
+                  "    var stops = data.fuel_plan.stops;",
+                  "    var maxRange = data.route.parameters ? data.route.parameters.max_range_miles : 500;",
+                  "    var pos = 0.0;",
+                  "    for (var i = 0; i < stops.length; i++) {",
+                  "        var leg = stops[i].mile_marker - pos;",
+                  "        pm.expect(leg).to.be.at.most(maxRange + 1.0);",
+                  "        pos = stops[i].mile_marker;",
+                  "    }",
+                  "    var finalLeg = data.route.distance_miles - pos;",
+                  "    pm.expect(finalLeg).to.be.at.most(maxRange + 1.0);",
+                  "});",
+                  "",
+                  "// Postman Visualizer Table",
+                  "var template = `",
+                  "<style>",
+                  "  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }",
+                  "  h2 { color: #38bdf8; margin-bottom: 8px; }",
+                  "  .summary { display: flex; gap: 20px; margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; }",
+                  "  .summary div { flex: 1; }",
+                  "  .summary span { display: block; font-size: 12px; color: #94a3b8; text-transform: uppercase; }",
+                  "  .summary strong { font-size: 20px; color: #f8fafc; }",
+                  "  table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; overflow: hidden; }",
+                  "  th, td { padding: 12px 16px; text-align: left; }",
+                  "  th { background: #334155; color: #cbd5e1; font-size: 13px; text-transform: uppercase; }",
+                  "  tr:nth-child(even) { background: #182234; }",
+                  "  tr:hover { background: #233554; }",
+                  "  .price { font-family: monospace; font-weight: 600; color: #34d399; }",
+                  "</style>",
+                  "<h2>FuelRoute Plan: {{response.route.start.label}} → {{response.route.finish.label}}</h2>",
+                  "<div class='summary'>",
+                  "  <div><span>Total Distance</span><strong>{{response.route.distance_miles}} mi</strong></div>",
+                  "  <div><span>Fuel Stops</span><strong>{{response.fuel_plan.stops.length}}</strong></div>",
+                  "  <div><span>Total Gallons</span><strong>{{response.fuel_plan.totals.total_fuel_gallons}} gal</strong></div>",
+                  "  <div><span>Total Fuel Cost</span><strong style='color:#34d399;'>${{response.fuel_plan.totals.total_fuel_cost_usd}}</strong></div>",
+                  "  <div><span>External Calls</span><strong>{{response.meta.external_calls}}</strong></div>",
+                  "</div>",
+                  "<table>",
+                  "  <thead>",
+                  "    <tr>",
+                  "      <th>#</th>",
+                  "      <th>Station</th>",
+                  "      <th>Location</th>",
+                  "      <th>Mile Marker</th>",
+                  "      <th>Detour</th>",
+                  "      <th>Price / Gal</th>",
+                  "      <th>Gallons</th>",
+                  "      <th>Cost</th>",
+                  "    </tr>",
+                  "  </thead>",
+                  "  <tbody>",
+                  "    {{#each response.fuel_plan.stops}}",
+                  "    <tr>",
+                  "      <td>{{sequence}}</td>",
+                  "      <td><strong>{{station_name}}</strong> (OPIS #{{opis_id}})</td>",
+                  "      <td>{{city}}, {{state}}</td>",
+                  "      <td>{{mile_marker}} mi</td>",
+                  "      <td>+{{detour_miles}} mi</td>",
+                  "      <td class='price'>${{price_usd_gal}}</td>",
+                  "      <td>{{gallons}} gal</td>",
+                  "      <td><strong>${{cost_usd}}</strong></td>",
+                  "    </tr>",
+                  "    {{/each}}",
+                  "  </tbody>",
+                  "</table>",
+                  "`;",
+                  "pm.visualizer.set(template, { response: data });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Coordinates Input (Chicago → Dallas)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": {\"lat\": 41.8781, \"lng\": -87.6298},\n  \"finish\": {\"lat\": 32.7767, \"lng\": -96.7970}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Resolved from coordinates\", function () {",
+                  "    pm.expect(data.route.start.source).to.equal('coordinates');",
+                  "    pm.expect(data.route.finish.source).to.equal('coordinates');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Free-Text Address Input",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Millennium Park, Chicago, IL\",\n  \"finish\": \"Dealey Plaza, Dallas, TX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Cost is a number\", function () {",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Variant (Query Parameters)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/route?start=Chicago,%20IL&finish=Dallas,%20TX",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"],
+              "query": [
+                { "key": "start", "value": "Chicago, IL" },
+                { "key": "finish", "value": "Dallas, TX" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Valid total fuel cost\", function () {",
+                  "    pm.expect(data.fuel_plan.totals.total_fuel_cost_usd).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Map URL (Interactive HTML)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/route/map?start=Chicago,%20IL&finish=Dallas,%20TX",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route", "map"],
+              "query": [
+                { "key": "start", "value": "Chicago, IL" },
+                { "key": "finish", "value": "Dallas, TX" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns HTML map page\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/html');",
+                  "    pm.expect(pm.response.text()).to.include('Leaflet');",
+                  "    pm.expect(pm.response.text()).to.include('route_data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Options",
+      "item": [
+        {
+          "name": "Custom Range and MPG (400 mi / 8 MPG)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Dallas, TX\",\n  \"max_range_miles\": 400,\n  \"mpg\": 8.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Custom parameters echoed\", function () {",
+                  "    pm.expect(data.route.parameters.max_range_miles).to.equal(400);",
+                  "    pm.expect(data.route.parameters.mpg).to.equal(8);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Geometry None (Payload minimization)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Dallas, TX\",\n  \"include_geometry\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Geometry is omitted\", function () {",
+                  "    pm.expect(data.geometry).to.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Start Mode Free (Vehicle starts with full free tank)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Dallas, TX\",\n  \"start_mode\": \"free\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Free start fill is null\", function () {",
+                  "    pm.expect(data.fuel_plan.start_fill).to.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Errors",
+      "item": [
+        {
+          "name": "Validation Error (Missing Parameters)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Returns structured VALIDATION_ERROR\", function () {",
+                  "    pm.expect(data.error.code).to.equal('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Outside USA Error (Toronto, ON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Toronto, ON\",\n  \"finish\": \"Dallas, TX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Returns OUTSIDE_USA error\", function () {",
+                  "    pm.expect(data.error.code).to.equal('OUTSIDE_USA');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "No Route Error (NYC → Honolulu)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"New York, NY\",\n  \"finish\": \"Honolulu, HI\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Returns NO_ROUTE error\", function () {",
+                  "    pm.expect(data.error.code).to.equal('NO_ROUTE');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Same Location Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Chicago, IL\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Returns SAME_LOCATION error\", function () {",
+                  "    pm.expect(data.error.code).to.equal('SAME_LOCATION');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Location Not Found",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"NonExistentPlaceXYZ12345, ZZ\",\n  \"finish\": \"Dallas, TX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "route"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test(\"Returns LOCATION_NOT_FOUND error\", function () {",
+                  "    pm.expect(data.error.code).to.equal('LOCATION_NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
